@@ -8,11 +8,12 @@ mod matrix;
 pub use matrix::{Matrix, Matrix2, Matrix3, Matrix4, Transformation};
 
 mod camera;
-pub use camera::Camera;
+pub use camera::{Camera, ViewPort};
 
 mod shader;
 pub use shader::Shader;
-//mod shape;
+
+mod renderer;
 
 use std::str;
 use std::time::{SystemTime, UNIX_EPOCH};
