@@ -1,5 +1,6 @@
-use crate::grafx::Vector3;
 
+
+use crate::grafx::physics::Vector3;
 use std::ops::Mul;
 use std::fmt::{Display, Formatter, Error};
 

@@ -1,4 +1,4 @@
-use crate::grafx::{Vector3, Matrix4};
+use crate::grafx::physics::{Vector3, Matrix4};
 
 #[allow(non_snake_case)]
 pub struct ViewPort{ projection:Matrix4, fov:f32,  viewPointWidth:i32, viewPointHeight:i32}

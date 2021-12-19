@@ -1,4 +1,4 @@
-use crate::grafx::Matrix4;
+use crate::grafx::physics::Matrix4;
 
 use gl::types::*;
 use std::{ptr, str};

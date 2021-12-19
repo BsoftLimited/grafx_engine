@@ -1,11 +1,7 @@
 extern crate glutin;
 extern crate gl;
 
-mod vector;
-pub use vector::{Color, Vector3};
-
-mod matrix;
-pub use matrix::{Matrix, Matrix2, Matrix3, Matrix4, Transformation};
+pub mod physics;
 
 mod camera;
 pub use camera::{Camera, ViewPort};
@@ -13,7 +9,11 @@ pub use camera::{Camera, ViewPort};
 mod shader;
 pub use shader::Shader;
 
+mod light;
+pub use light::{Light, DirectionalLight, PointLight, SpotLight};
+
 mod renderer;
+pub use renderer::Renderer;
 
 use std::str;
 use std::time::{SystemTime, UNIX_EPOCH};
