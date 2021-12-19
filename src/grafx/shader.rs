@@ -1,5 +1,3 @@
-use crate::grafx::physics::Matrix4;
-
 use gl::types::*;
 use std::{ptr, str};
 use std::ffi::CString;
@@ -69,11 +67,11 @@ impl Shader{
         gl::ProgramUniform1f(self.shader_program, uniform, value);
     }
 
-    pub unsafe fn setUniformMatrix(&self, name:&str, matrix: &Matrix4){
+    pub unsafe fn setUniformMatrix(&self, name:&str, matrix: &[[f32; 4]; 4]){
         let c_name = CString::new(name).unwrap();
 
        let uniform = gl::GetUniformLocation(self.shader_program, c_name.as_ptr());
-        gl::ProgramUniformMatrix4fv(self.shader_program, uniform, 1, gl::TRUE, std::mem::transmute(&matrix.getData()));
+        gl::ProgramUniformMatrix4fv(self.shader_program, uniform, 1, gl::TRUE, std::mem::transmute(matrix));
     }
 
     pub unsafe  fn bind(&self){

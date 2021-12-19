@@ -22,7 +22,7 @@ pub struct Matrix2{ size: usize, data:[[f32; 2]; 2], }
 #[allow(dead_code)]
 #[allow(non_snake_case)]
 impl Matrix2{
-    fn getData(&self)->[[f32; 2]; 2]{ self.data}
+    fn getData(&self)->&[[f32; 2]; 2]{ &self.data}
 }
 
 #[allow(non_snake_case)]
@@ -247,7 +247,7 @@ pub struct Matrix4{ size: usize, data:[[f32; 4]; 4], }
 impl Matrix4{
     pub fn set(&mut self, matrix:&Matrix4){ self.data = matrix.data; }
 
-    pub fn getData(&self)->[[f32; 4]; 4]{ self.data }
+    pub fn getData(&self)->&[[f32; 4]; 4]{ &self.data }
     pub fn xRotationMatrix(degree:f32)->Self{
         let mut matrix = Matrix4::identity();
         let radian = f32::to_radians(degree);

@@ -15,6 +15,8 @@ pub use light::{Light, DirectionalLight, PointLight, SpotLight};
 mod renderer;
 pub use renderer::Renderer;
 
+pub mod models;
+
 use std::str;
 use std::time::{SystemTime, UNIX_EPOCH};
 

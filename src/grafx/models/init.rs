@@ -1,4 +1,4 @@
-mod shader;
+use crate::grafx::physics::Color;
 
 use gl::types::*;
 
