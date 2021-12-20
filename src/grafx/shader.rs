@@ -1,3 +1,4 @@
+use crate::grafx::resources::{SIMPLE_VERTEX_SOURCE, SIMPLE_FRAGMENT_SOURCE};
 use gl::types::*;
 use std::{ptr, str};
 use std::ffi::CString;
@@ -7,7 +8,7 @@ pub struct Shader{ shader_program: u32}
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 impl Shader{
-    pub unsafe fn new(vertex: &str, fragment: &str) -> Self{
+    unsafe fn new(vertex: &str, fragment: &str) -> Self{
         // Setup shader compilation checks
         let vertex_shader = Shader::compile(gl::VERTEX_SHADER, vertex);
         let fragment_shader = Shader::compile(gl::FRAGMENT_SHADER, fragment);
@@ -15,6 +16,8 @@ impl Shader{
         let shader_program = Shader::link(vertex_shader, fragment_shader);
         Shader { shader_program }
     }
+
+    pub unsafe fn Simple()->Self{ return Shader::new(SIMPLE_VERTEX_SOURCE, SIMPLE_FRAGMENT_SOURCE); }
 
     unsafe fn compile(shaderType: u32, shaderSource:&str) -> u32{
         // Setup shader compilation checks
@@ -77,4 +80,15 @@ impl Shader{
     pub unsafe  fn bind(&self){
         gl::UseProgram(self.shader_program);
     }
+}
+
+#[allow(non_snake_case)]
+pub trait Material{
+    fn getShader(&self)->&Box<Shader>;
+}
+
+pub struct BasicMaterial{ shader:Box<Shader>}
+
+impl Material for BasicMaterial {
+    fn getShader(&self) -> &Box<Shader> { &self.shader }
 }

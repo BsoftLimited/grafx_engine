@@ -545,7 +545,7 @@ impl Transformation{
         self.transform.data = mat.data;
     }
 
-    pub fn getTransform(&self)->&Matrix4{ &self.transform }
+    pub fn getTransformMatrix(&self)->&[[f32; 4]; 4]{ &self.transform.getData() }
     pub fn setPosition(&mut self, x:f32, y:f32, z:f32){ self.position.set(x, y, z); }
     pub fn translate(&mut self, x:f32, y:f32, z:f32){ self.position.addV(x, y, z); }
     pub fn setRotation(&mut self, x:f32, y:f32, z:f32){ self.rotation.set(x, y, z); }

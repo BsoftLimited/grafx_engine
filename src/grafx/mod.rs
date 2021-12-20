@@ -1,6 +1,8 @@
 extern crate glutin;
 extern crate gl;
 
+mod resources;
+
 pub mod physics;
 
 mod camera;
@@ -49,13 +51,13 @@ impl GameWindowDetails{
 #[allow(dead_code)]
 #[allow(non_snake_case)]
 pub trait GameWindow{
-    fn initialize(&self);
-    fn update(&self, delta: f32);
-    fn render(&self);
+    fn initialize(&mut self);
+    fn update(&mut self, delta: f32);
+    unsafe fn render(&self);
 }
 
 
-pub fn run(game: Box<dyn GameWindow>, detail:&GameWindowDetails){
+pub fn run(mut game: Box<dyn GameWindow>, detail:&GameWindowDetails){
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().with_title(detail.getTitle()).with_inner_size(glutin::dpi::LogicalSize::new(detail.getWidth(), detail.getHeight()));
     let context = unsafe {
