@@ -1,11 +1,6 @@
 mod grafx;
 
-use crate::grafx::ViewPort;
-use crate::grafx::Camera;
-use crate::grafx::Shader;
-use crate::grafx::models::shape::Shape;
-use crate::grafx::models::model::Model;
-use crate::grafx::Renderer;
+use crate::grafx::{Renderer, ViewPort, Camera, Shader, models::{shape::Shape, model::Model}};
 use grafx::{ GameWindow, GameWindowDetails};
 
 #[allow(non_snake_case)]
@@ -20,7 +15,7 @@ impl GameWindow for Test {
     fn initialize(&mut self) {
         unsafe{
             let model = Model::new(Shape::Box(), Shader::Simple());
-            let renderer = Renderer::new(Camera::new(3.0, 3.0, 3.0), ViewPort::new(45.0, 800, 480));
+            let renderer = Renderer::new(Camera::new(5.0, 5.0, 5.0), ViewPort::new(45.0, 800, 480));
             self.component = std::option::Option::Some(TestObjects{renderer:Box::new(renderer), model:Box::new(model)})
         }
     }

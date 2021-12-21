@@ -1,7 +1,4 @@
-
-use crate::grafx::light::Light;
-use crate::grafx::ViewPort;
-use crate::grafx::Camera;
+use crate::grafx::{Light, ViewPort, Camera};
 
 #[allow(non_snake_case)]
 pub struct Renderer{ camera:Box<Camera>, viewPort:Box<ViewPort>, lights:Vec<Box<dyn Light>>}

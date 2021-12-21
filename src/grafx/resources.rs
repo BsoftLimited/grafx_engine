@@ -17,9 +17,9 @@ pub const SIMPLE_VERTEX_SOURCE: &str = r#"
         uniform mat4 projection;
 
         void main(){
-            fragPosition=vec3(transform * vec4(position,1.0));
-            gl_Position=projection * (view*vec4(fragPosition,1.0));
-            normalLight=transform*vec4(normal,1.0);
+            fragPosition = vec3(transform * vec4(position,1.0));
+            gl_Position = projection * (view * vec4(fragPosition,1.0));
+            normalLight = transform * vec4(normal,1.0);
             colorOut = color;
         }
     "#;

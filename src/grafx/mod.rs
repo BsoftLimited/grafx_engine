@@ -11,8 +11,8 @@ pub use camera::{Camera, ViewPort};
 mod shader;
 pub use shader::Shader;
 
-mod light;
-pub use light::{Light, DirectionalLight, PointLight, SpotLight};
+mod lights;
+pub use lights::{Light, DirectionalLight, PointLight, SpotLight};
 
 mod renderer;
 pub use renderer::Renderer;
