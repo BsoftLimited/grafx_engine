@@ -37,11 +37,11 @@ pub trait Disposable{ fn dispose(&self); }
 
 #[allow(dead_code)]
 #[allow(non_snake_case)]
-pub struct GameWindowDetails{ title:String, width:i32, height: i32}
+pub struct WindowDetails{ title:String, width:i32, height: i32}
 #[allow(non_snake_case)]
-impl GameWindowDetails{
+impl WindowDetails{
     pub fn new(titl:&str, width:i32, height:i32)-> Self{
-        GameWindowDetails{ title:String::from(titl), width, height}
+        WindowDetails{ title:String::from(titl), width, height}
     }
     pub fn getTitle(&self)->&str{ self.title.as_ref() }
     pub fn getWidth(&self)->i32{ self.width }
@@ -50,13 +50,13 @@ impl GameWindowDetails{
 
 #[allow(dead_code)]
 #[allow(non_snake_case)]
-pub trait GameWindow{
+pub trait WindowHandler : Disposable{
     fn update(&mut self, delta: f32);
     fn resize(&mut self,width: i32, height:i32);
     unsafe fn render(&self);
 }
 
-pub fn init(detail:&GameWindowDetails)->(EventLoop<()>, WindowedContext<PossiblyCurrent>){
+pub fn init(detail:&WindowDetails)->(EventLoop<()>, WindowedContext<PossiblyCurrent>){
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().with_title(detail.getTitle()).with_inner_size(glutin::dpi::LogicalSize::new(detail.getWidth(), detail.getHeight()));
     let context = unsafe {
@@ -79,7 +79,7 @@ pub fn init(detail:&GameWindowDetails)->(EventLoop<()>, WindowedContext<Possibly
     
 }
 
-pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut game: Box<dyn GameWindow>){
+pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut game: Box<dyn WindowHandler>){
     let (event_loop, context)  = win_context;
     event_loop.run(move | event, _, control_flow| {   
         match event {

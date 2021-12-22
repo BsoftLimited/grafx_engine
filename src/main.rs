@@ -1,8 +1,9 @@
 mod grafx;
 
+use crate::grafx::Disposable;
 use crate::grafx::DirectionalLight;
 use crate::grafx::{Renderer, ViewPort, Camera, Shader, models::{shape::Shape, model::Model}};
-use grafx::{ GameWindow, GameWindowDetails};
+use grafx::{ WindowHandler, WindowDetails};
 
 
 #[allow(non_snake_case)]
@@ -19,7 +20,7 @@ impl Test{
     }
 }
 
-impl GameWindow for Test {
+impl WindowHandler for Test {
     fn update(&mut self, delta: f32){
         self.model.getTransform().rotate(30.0 * delta, 30.0 * delta, 30.0 * delta);
         self.model.getTransform().update();
@@ -34,8 +35,14 @@ impl GameWindow for Test {
     }
 }
 
+impl Disposable for Test {
+    fn dispose(&self) {
+
+    }
+}
+
 pub fn main(){
-    let details = GameWindowDetails::new("Grafx Engine", 800, 480);
+    let details = WindowDetails::new("Grafx Engine", 800, 480);
     let context = grafx::init(&details);
     unsafe{  grafx::start(context, Box::new(Test::new())); }
    
