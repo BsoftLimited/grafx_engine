@@ -28,6 +28,10 @@ impl GameWindow for Test {
     unsafe fn render(&self) {
         self.model.render(&self.renderer);
     }
+
+    fn resize(&mut self, width: i32, height: i32){
+        println!("new size width:{}, height{}", width, height);
+    }
 }
 
 pub fn main(){

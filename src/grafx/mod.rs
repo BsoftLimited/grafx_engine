@@ -52,6 +52,7 @@ impl GameWindowDetails{
 #[allow(non_snake_case)]
 pub trait GameWindow{
     fn update(&mut self, delta: f32);
+    fn resize(&mut self,width: i32, height:i32);
     unsafe fn render(&self);
 }
 
@@ -85,7 +86,11 @@ pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut
             Event::LoopDestroyed => return,
             Event::WindowEvent{ event, ..} => match event{
                 WindowEvent::CloseRequested => { *control_flow = ControlFlow::Exit},
-                WindowEvent::Resized(size) => context.resize(size),
+                WindowEvent::Resized(size) => {
+                    unsafe{ gl::Viewport(0, 0, size.width as i32, size.height as i32); }
+                    context.resize(size);
+                    game.resize(size.width as i32, size.height as i32);
+                },
                 _ => (),
             }
             _ =>()
