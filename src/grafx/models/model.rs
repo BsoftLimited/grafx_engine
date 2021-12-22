@@ -25,6 +25,7 @@ impl Model{
             self.shader.setUniformMatrix("transform", self.transform.getTransformMatrix());
             self.shader.setUniformMatrix("projection", renderer.getProjection());
             self.shader.setUniformMatrix("view", renderer.getView());
+            
             gl::DrawElements(gl::TRIANGLES, self.shape.getIndexCount(), gl::UNSIGNED_INT,  0 as *const _);
         }
     }

@@ -6,6 +6,7 @@ mod resources;
 pub mod physics;
 
 mod camera;
+use glutin::{ PossiblyCurrent, WindowedContext};
 pub use camera::{Camera, ViewPort};
 
 mod shader;
@@ -30,7 +31,6 @@ use glutin::event_loop::{ ControlFlow, EventLoop};
 use glutin::window::{WindowBuilder};
 use glutin::{ContextBuilder};
 
-
 #[allow(dead_code)]
 #[allow(non_snake_case)]
 pub trait Disposable{ fn dispose(&self); }
@@ -51,13 +51,11 @@ impl GameWindowDetails{
 #[allow(dead_code)]
 #[allow(non_snake_case)]
 pub trait GameWindow{
-    fn initialize(&mut self);
     fn update(&mut self, delta: f32);
     unsafe fn render(&self);
 }
 
-
-pub fn run(mut game: Box<dyn GameWindow>, detail:&GameWindowDetails){
+pub fn init(detail:&GameWindowDetails)->(EventLoop<()>, WindowedContext<PossiblyCurrent>){
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().with_title(detail.getTitle()).with_inner_size(glutin::dpi::LogicalSize::new(detail.getWidth(), detail.getHeight()));
     let context = unsafe {
@@ -74,9 +72,15 @@ pub fn run(mut game: Box<dyn GameWindow>, detail:&GameWindowDetails){
         gl::CullFace(gl::BACK);
         gl::Enable(gl::CULL_FACE);
         gl::Enable(gl::DEPTH_TEST);
-        game.initialize();
     }
-    event_loop.run(move | event, _, control_flow| {
+
+    ( event_loop, context)
+    
+}
+
+pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut game: Box<dyn GameWindow>){
+    let (event_loop, context)  = win_context;
+    event_loop.run(move | event, _, control_flow| {   
         match event {
             Event::LoopDestroyed => return,
             Event::WindowEvent{ event, ..} => match event{
