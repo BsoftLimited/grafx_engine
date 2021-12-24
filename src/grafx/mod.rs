@@ -100,7 +100,7 @@ pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut
             let current = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64();
             DELTA_TIME = current - LAST_TIME;
             LAST_TIME = current;
-            gl::ClearColor(0.0, 0.0, 0.2, 0.0);
+            gl::ClearColor(0.0, 0.0, 0.0, 0.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
             game.render();
             game.update(DELTA_TIME as f32);

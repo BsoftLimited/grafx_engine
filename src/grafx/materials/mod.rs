@@ -16,11 +16,6 @@ impl MaterialProperty{
     pub fn getAmbientColor(&self)->&Box<Color>{ &self.ambient }
     pub fn getSpecularColor(&self)->&Box<Color>{ &self.specular }
     pub fn getShininess(&self)->f32{ self.shinines}
-
-    pub fn setDiffuseColor(&mut self, color:Color){ self.diffuse = Box::new(color); }
-    pub fn setAmbientColor(&mut self, color:Color){ self.ambient = Box::new(color); }
-    pub fn setSpecularColor(&mut self, color:Color){ self.specular = Box::new(color); }
-    pub fn setShininess(&mut self, shinines:f32){ self.shinines = shinines; }
 }
 
 #[allow(non_snake_case)]
@@ -35,6 +30,11 @@ pub trait Material{
 		self.getShader().setUniformColor("material.ambient", &init.getAmbientColor());
 		self.getShader().setUniformValue("material.shininess", init.getShininess());
     }
+
+    fn setDiffuseColor(&mut self, color:Color);
+    fn setAmbientColor(&mut self, color:Color);
+    fn setSpecularColor(&mut self, color:Color);
+    fn setShininess(&mut self, shinines:f32);
 }
 
 pub struct BasicMaterial{ shader:Box<Shader>, properties:Box<MaterialProperty>}
@@ -49,4 +49,9 @@ impl BasicMaterial{
 impl Material for BasicMaterial {
     fn getShader(&self) -> &Box<Shader> { &self.shader }
     fn getProperties(&self) -> &Box<MaterialProperty> { &self.properties }
+
+    fn setDiffuseColor(&mut self, color:Color){ self.properties.diffuse = Box::new(color); }
+    fn setAmbientColor(&mut self, color:Color){ self.properties.ambient = Box::new(color); }
+    fn setSpecularColor(&mut self, color:Color){ self.properties.specular = Box::new(color); }
+    fn setShininess(&mut self, shinines:f32){ self.properties.shinines = shinines; }
 }
