@@ -1,8 +1,9 @@
 mod grafx;
 
+use crate::grafx::materials::BasicMaterial;
 use crate::grafx::Disposable;
-use crate::grafx::DirectionalLight;
-use crate::grafx::{Renderer, ViewPort, Camera, Shader, models::{shape::Shape, model::Model}};
+use crate::grafx::{LightType, Light};
+use crate::grafx::{Renderer, ViewPort, Camera, models::{shape::Shape, model::Model}};
 use grafx::{ WindowHandler, WindowDetails};
 
 
@@ -11,10 +12,10 @@ struct Test{renderer:Box<Renderer>, model:Box<Model>}
 
 impl Test{
     unsafe fn new()->Self{
-        let model = Model::new(Shape::Box(), Shader::Simple());
-        let mut renderer = Renderer::new(Camera::new(5.0, 5.0, 5.0), ViewPort::new(45.0, 800, 480));
-        let mut light = Box::new(DirectionalLight::new());
-        light.setDirection(-1.0, -2.0, -3.0);
+        let model = Model::new(Shape::Box(), Box::new(BasicMaterial::new()));
+        let mut renderer = Renderer::new(Camera::new(0.0, 2.0, -4.0), ViewPort::new(45.0, 800, 480));
+        let mut light = Box::new(Light::new(LightType::newDirectional()));
+        light.setDirection(0.3, -0.7, 0.2);
         renderer.addLight(light);
         Test{ renderer: Box::new(renderer), model: Box::new(model)}
     }

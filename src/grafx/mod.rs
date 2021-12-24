@@ -1,24 +1,21 @@
 extern crate glutin;
 extern crate gl;
 
-mod resources;
-
 pub mod physics;
-
+mod resources;
 mod camera;
+pub mod light;
+mod renderer;
+pub mod models;
+pub mod materials;
+
+
 use glutin::{ PossiblyCurrent, WindowedContext};
 pub use camera::{Camera, ViewPort};
-
-mod shader;
-pub use shader::Shader;
-
-mod lights;
-pub use lights::{Light, DirectionalLight, PointLight, SpotLight};
-
-mod renderer;
 pub use renderer::Renderer;
+pub use light::{Light, LightType };
+pub use materials::BasicMaterial;
 
-pub mod models;
 
 use std::str;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -85,7 +82,10 @@ pub fn start(win_context: (EventLoop<()>, WindowedContext<PossiblyCurrent>), mut
         match event {
             Event::LoopDestroyed => return,
             Event::WindowEvent{ event, ..} => match event{
-                WindowEvent::CloseRequested => { *control_flow = ControlFlow::Exit},
+                WindowEvent::CloseRequested => {
+                    game.dispose();
+                    *control_flow = ControlFlow::Exit
+                },
                 WindowEvent::Resized(size) => {
                     unsafe{ gl::Viewport(0, 0, size.width as i32, size.height as i32); }
                     context.resize(size);

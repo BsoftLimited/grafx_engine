@@ -33,13 +33,14 @@ pub const SIMPLE_FRAGMENT_SOURCE: &str = r#"
         };
 
         struct DirectionalLight{
-            vec3 direction; vec3 color;
+            vec3 direction;
+            vec4 color;
             float ambientStrenght;
             float intensity;
         };
 
         struct PointLight{
-            vec4 position;
+            vec3 position;
             vec4 color;
             float linear;
             float quadratic;
@@ -48,8 +49,8 @@ pub const SIMPLE_FRAGMENT_SOURCE: &str = r#"
         };
 
         struct SpotLight{
-            vec4 position;
-            vec3 color ;
+            vec3 position;
+            vec4 color ;
             float intensity;
             vec3 direction;
             float ambientStrenght;
@@ -76,22 +77,22 @@ pub const SIMPLE_FRAGMENT_SOURCE: &str = r#"
         vec4 calculateDir(DirectionalLight light ,vec3 norm,vec3 viewDir){
             vec3 lightDir=normalize(-light.direction);
             
-            vec4 ambient=(material.ambient * vec4(light.color, 1.0) * light.ambientStrenght) * material.diffuse * colorOut ;
+            vec4 ambient=(material.ambient * light.color * light.ambientStrenght) * material.diffuse * colorOut ;
             
             vec3 reflectDir = reflect(-lightDir, norm);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
             vec4 specular = material.specular * spec;
             
             float diff= max(dot(vec3(norm),lightDir),0.0);
-            vec4 diffuse = vec4(light.color, 1.0) * material.diffuse * colorOut *diff;
+            vec4 diffuse = light.color * material.diffuse * colorOut *diff;
             
             return (ambient+specular+diffuse) * light.intensity;
         }
 
         vec4 calculatePoint(PointLight light, vec3 norm,vec3 viewDir){
-            vec3 lightDir=normalize(light.position.xyz -fragPosition);
+            vec3 lightDir=normalize(light.position -fragPosition);
             
-            float distance=length(light.position.xyz-fragPosition);
+            float distance=length(light.position-fragPosition);
             float att=1.0/(1.0+(light.linear*distance)+(light.quadratic*(pow(distance,2))));
             
             vec4 ambient=(material.ambient * light.color) * material.diffuse * light.ambientStrenght * colorOut * att;
@@ -107,11 +108,11 @@ pub const SIMPLE_FRAGMENT_SOURCE: &str = r#"
         }
 
         vec4 calculateSpot(SpotLight light, vec3 norm, vec3 viewDir){
-            vec3 lightDir=normalize(light.position.xyz - fragPosition);
+            vec3 lightDir=normalize(light.position - fragPosition);
             
             float theta=dot(lightDir,normalize(-light.direction));
-            float distance=length(light.position.xyz-fragPosition);
-            float att=1.0/(1.0+(light.linear*distance)+(light.quadratic*(pow(distance,2))));
+            float distance=length(light.position - fragPosition);
+            float att=1.0/(1.0+(light.linear * distance)+(light.quadratic*(pow(distance,2))));
             
             if(theta>light.outerRadius){
                 float intensity=0;
@@ -120,17 +121,17 @@ pub const SIMPLE_FRAGMENT_SOURCE: &str = r#"
                     intensity = clamp((theta - light.outerRadius) / epsilon, 0.0, 1.0);
                 }
                     
-                vec4 ambient=(material.ambient * vec4(light.color, 1)) * material.diffuse * colorOut ;
+                vec4 ambient=(material.ambient * light.color) * material.diffuse * colorOut ;
                     
                 vec3 reflectDir = reflect(-lightDir, norm);
                 float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
                 vec4 specular = material.specular * spec * intensity * att;
                     
                 float diff= max(dot(vec3(norm),lightDir),0.0);
-                vec4 diffuse = vec4(light.color, 1) * material.diffuse * colorOut * diff * intensity * att;
+                vec4 diffuse = light.color * material.diffuse * colorOut * diff * intensity * att;
                     
                 return (ambient+specular+diffuse) * light.intensity;
-                //return vec4(1, 0, 0, 1) * vec4(light.color, 1);
+                //return vec4(1, 0, 0, 1) * light.color;
             }else{
                 return vec4(0);
             }

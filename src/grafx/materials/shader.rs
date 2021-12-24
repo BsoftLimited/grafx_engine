@@ -1,3 +1,5 @@
+use crate::grafx::physics::Color;
+use crate::grafx::physics::Vector3;
 use crate::grafx::resources::{SIMPLE_VERTEX_SOURCE, SIMPLE_FRAGMENT_SOURCE};
 use gl::types::*;
 use std::{ptr, str};
@@ -70,6 +72,27 @@ impl Shader{
         gl::ProgramUniform1f(self.shader_program, uniform, value);
     }
 
+    pub unsafe fn setUniformInt(&self, name:&str, value: i32){
+        let c_name = CString::new(name).unwrap();
+        let ptr = c_name.as_ptr();
+        let uniform = gl::GetUniformLocation(self.shader_program, ptr);
+        gl::ProgramUniform1i(self.shader_program, uniform, value);
+    }
+
+    pub unsafe fn setUniformVector3(&self, name:&str, vector:&Vector3){
+        let c_name = CString::new(name).unwrap();
+        let ptr = c_name.as_ptr();
+        let uniform = gl::GetUniformLocation(self.shader_program, ptr);
+        gl::ProgramUniform3f(self.shader_program, uniform, vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    pub unsafe fn setUniformColor(&self, name:&str, color:&Color){
+        let c_name = CString::new(name).unwrap();
+        let ptr = c_name.as_ptr();
+        let uniform = gl::GetUniformLocation(self.shader_program, ptr);
+        gl::ProgramUniform4f(self.shader_program, uniform, color.red, color.green, color.blue, color.alpha);
+    }
+
     pub unsafe fn setUniformMatrix(&self, name:&str, matrix: &[[f32; 4]; 4]){
         let c_name = CString::new(name).unwrap();
 
@@ -80,15 +103,4 @@ impl Shader{
     pub unsafe  fn bind(&self){
         gl::UseProgram(self.shader_program);
     }
-}
-
-#[allow(non_snake_case)]
-pub trait Material{
-    fn getShader(&self)->&Box<Shader>;
-}
-
-pub struct BasicMaterial{ shader:Box<Shader>}
-
-impl Material for BasicMaterial {
-    fn getShader(&self) -> &Box<Shader> { &self.shader }
 }

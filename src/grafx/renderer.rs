@@ -1,7 +1,8 @@
-use crate::grafx::{Light, ViewPort, Camera};
+use crate::grafx::light::Light;
+use crate::grafx::{ViewPort, Camera};
 
 #[allow(non_snake_case)]
-pub struct Renderer{ camera:Box<Camera>, viewPort:Box<ViewPort>, lights:Vec<Box<dyn Light>>}
+pub struct Renderer{ camera:Box<Camera>, viewPort:Box<ViewPort>, lights:Vec<Box<Light>>}
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -14,9 +15,9 @@ impl Renderer{
     pub fn setViewPort(&mut self, viewPort:ViewPort){ self.viewPort = Box::new(viewPort);}
     pub fn getView(&self)->&[[f32; 4]; 4]{ self.camera.getViewMatrix().getData()}
     pub fn getProjection(&self)->&[[f32; 4]; 4]{ self.viewPort.getProjectionMatrix().getData()}
-    pub fn getLights(&self)->&Vec<Box<dyn Light>>{ &self.lights }
+    pub fn getLights(&self)->&Vec<Box<Light>>{ &self.lights }
 
-    pub fn addLight(&mut self, light:Box<dyn Light>)->bool{
+    pub fn addLight(&mut self, light:Box<Light>)->bool{
         let init = &light;
         for n in 0..self.lights.len(){
             if self.lights[n].getID() == init.getID(){ return false; }
@@ -25,7 +26,7 @@ impl Renderer{
         return true;
     }
 
-    pub fn removeLight<T:Light>(&mut self, light:&T)->bool{
+    pub fn removeLight(&mut self, light:&Light)->bool{
         for n in 0..self.lights.len(){
             if self.lights[n].getID() == light.getID(){
                 self.lights.remove(n);
@@ -35,7 +36,7 @@ impl Renderer{
         return false;
     }
 
-    pub fn getLightByID(&self, cameraID:&str)->Option<&Box<dyn Light>>{
+    pub fn getLightByID(&self, cameraID:&str)->Option<&Box<Light>>{
         for n in 0..self.lights.len(){
             if self.lights[n].getID() == cameraID{
                 return Some(&self.lights[n])
@@ -45,7 +46,7 @@ impl Renderer{
     }
 
 
-    pub fn getLightByIndex(&self, index:usize)->Option<&Box<dyn Light>>{
+    pub fn getLightByIndex(&self, index:usize)->Option<&Box<Light>>{
         if index < self.lights.len(){
             return Some(&self.lights[index])
         }
