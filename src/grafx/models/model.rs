@@ -1,3 +1,4 @@
+use crate::Disposable;
 use crate::grafx::materials::Material;
 use crate::grafx::models::shape::Shape;
 use crate::grafx::Renderer;
@@ -70,5 +71,11 @@ impl Model{
             }
             gl::DrawElements(gl::TRIANGLES, self.shape.getIndexCount(), gl::UNSIGNED_INT,  0 as *const _);
         }
+    }
+}
+
+impl Disposable for Model{
+    fn dispose(&self) {
+        self.material.dispose();
     }
 }

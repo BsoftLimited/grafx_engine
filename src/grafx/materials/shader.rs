@@ -103,4 +103,8 @@ impl Shader{
     pub unsafe  fn bind(&self){
         gl::UseProgram(self.shader_program);
     }
+
+    pub unsafe fn dispose(&self){
+        gl::DeleteProgram(self.shader_program);
+    }
 }

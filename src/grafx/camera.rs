@@ -1,28 +1,34 @@
 use crate::grafx::physics::{Vector3, Matrix4};
 
+pub enum ViewPortType{ Perspective(f32, f32, f32), Orthographic }
+
 #[allow(non_snake_case)]
-pub struct ViewPort{ projection:Matrix4, fov:f32,  viewPointWidth:i32, viewPointHeight:i32}
+pub struct ViewPort{ projection:Matrix4, portType:ViewPortType,  viewPointWidth:i32, viewPointHeight:i32}
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 impl ViewPort{
-    pub fn new(fov:f32, width:i32, height:i32)->Self{
+    pub fn Perspective(fov:f32, width:i32, height:i32)->Self{
         let view = Matrix4::ProjectionMatrix(fov, width as f32, height as f32, 1.0, 1000.0);
-        ViewPort{ projection:view, fov:fov, viewPointWidth:width, viewPointHeight:height}
+        ViewPort{ projection:view, portType:ViewPortType::Perspective(fov, 1.0, 1000.0), viewPointWidth:width, viewPointHeight:height}
     }
 
     pub fn getViewPortWidth(&self)->i32{ self.viewPointWidth}
     pub fn getViewPortHeiht(&self)->i32{ self.viewPointHeight}
-    pub fn getFOV(&self)->f32{ self.fov}
+    pub fn getType(&self)->&ViewPortType{ &self.portType }
 
     pub fn setFOV(&mut self, fov:f32){
-        self.fov = fov;
-        self.projection = Matrix4::ProjectionMatrix(self.fov, self.viewPointWidth as f32, self.viewPointHeight as f32, 1.0, 1000.0);
+        if let ViewPortType::Perspective(field, _, _) = &mut self.portType {
+            *field = fov;
+            self.projection = Matrix4::ProjectionMatrix(fov, self.viewPointWidth as f32, self.viewPointHeight as f32, 1.0, 1000.0);
+        }
     }
 
-    pub fn setViewPort(&mut self, width:i32, hieght:i32){
+    pub fn setViewPortSize(&mut self, width:i32, hieght:i32){
         self.viewPointWidth = width;
         self.viewPointHeight = hieght;
-        self.projection = Matrix4::ProjectionMatrix(self.fov, self.viewPointWidth as f32, self.viewPointHeight as f32, 1.0, 1000.0);
+        if let ViewPortType::Perspective(fov, near, far) = self.portType {
+            self.projection = Matrix4::ProjectionMatrix(fov, self.viewPointWidth as f32, self.viewPointHeight as f32, near, far);
+        }
     }
 
     pub fn getProjectionMatrix(&self)->&Matrix4{ &self.projection }

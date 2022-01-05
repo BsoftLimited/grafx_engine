@@ -1,5 +1,6 @@
 mod shader;
 
+use crate::Disposable;
 use crate::grafx::physics::Color;
 use crate::grafx::materials::shader::Shader;
 
@@ -19,7 +20,7 @@ impl MaterialProperty{
 }
 
 #[allow(non_snake_case)]
-pub trait Material{
+pub trait Material : Disposable{
     fn getShader(&self)->&Box<Shader>;
     fn getProperties(&self)->&Box<MaterialProperty>;
     unsafe fn r#use(&self){
@@ -54,4 +55,10 @@ impl Material for BasicMaterial {
     fn setAmbientColor(&mut self, color:Color){ self.properties.ambient = Box::new(color); }
     fn setSpecularColor(&mut self, color:Color){ self.properties.specular = Box::new(color); }
     fn setShininess(&mut self, shinines:f32){ self.properties.shinines = shinines; }
+}
+
+impl Disposable for BasicMaterial{
+    fn dispose(&self) {
+        unsafe { self.getShader().dispose(); }
+    }
 }

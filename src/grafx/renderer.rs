@@ -16,6 +16,7 @@ impl Renderer{
     pub fn getView(&self)->&[[f32; 4]; 4]{ self.camera.getViewMatrix().getData()}
     pub fn getProjection(&self)->&[[f32; 4]; 4]{ self.viewPort.getProjectionMatrix().getData()}
     pub fn getLights(&self)->&Vec<Box<Light>>{ &self.lights }
+    pub fn getViewPort(&mut self)->&mut ViewPort{ &mut self.viewPort } 
 
     pub fn addLight(&mut self, light:Box<Light>)->bool{
         let init = &light;
