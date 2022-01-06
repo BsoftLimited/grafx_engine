@@ -58,6 +58,7 @@ First of all, to render something to the screen, you will need a Renderer. A ren
     ViewPort comes in two different flavours, which is Perspective and Orthographic.
     - Perspective : Used for 3D games.
     - Orthographic : Used for 2D games.
+    
     in our case we want to display a 3D cude, so Perspective ViewPort is the logical choice. this takes three arguments
     which are:
     - Field of View : this is the angle in which the models are scaled depending to their position relative to the camera.
