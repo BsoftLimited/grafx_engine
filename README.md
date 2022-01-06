@@ -114,6 +114,7 @@ First of all, to render something to the screen, you will need a Renderer. A ren
     A Model is the 3D components to be renderer, it takes two components
     - Material : this contain the color, texture, shininness properties of the model.
     - Shape : this contains the physical shape of the model.
+    
     the model itself only contains the transformation of the 3D object, which is the scale, position and rotation of the 
     3D object.
     
