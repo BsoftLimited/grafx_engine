@@ -1,35 +1,54 @@
+use std::io::Read;
 use crate::grafx::physics::Color;
 use crate::grafx::physics::Vector3;
-use crate::grafx::resources::{SIMPLE_VERTEX_SOURCE, SIMPLE_FRAGMENT_SOURCE};
 use gl::types::*;
 use std::{ptr, str};
 use std::ffi::CString;
+use std::fs;
 
-#[allow(non_snake_case)]
+
 pub struct Shader{ shader_program: u32}
-#[allow(non_snake_case)]
+
 #[allow(dead_code)]
 impl Shader{
-    unsafe fn new(vertex: &str, fragment: &str) -> Self{
+    unsafe fn new(vertex: &str, fragment: &str, geomery:&str) -> Self{
+        let vertex_data = Shader::read(vertex);
+        let fragment_data = Shader::read(fragment);
+        //let geometry_data = Shader::read(geomery);
         // Setup shader compilation checks
-        let vertex_shader = Shader::compile(gl::VERTEX_SHADER, vertex);
-        let fragment_shader = Shader::compile(gl::FRAGMENT_SHADER, fragment);
+        let vertex_shader = Shader::compile(gl::VERTEX_SHADER, vertex_data.as_ref());
+        let fragment_shader = Shader::compile(gl::FRAGMENT_SHADER, fragment_data.as_ref());
+        //let geometry_shader = Shader::compile(gl::GEOMETRY_SHADER, geometry_data.as_ref());
 
         let shader_program = Shader::link(vertex_shader, fragment_shader);
         Shader { shader_program }
     }
 
-    pub unsafe fn Simple()->Self{ return Shader::new(SIMPLE_VERTEX_SOURCE, SIMPLE_FRAGMENT_SOURCE); }
+    fn read(shader: &str)->String{
+        let  mut content = String::new();
+        match &mut std::fs::File::open(shader){
+            Ok(file) =>{
+                if let Result::Err(error) = file.read_to_string(&mut content){
+                    print!("{}", error);
+                }
+            },
+            Err(error)=>{ print!("{}", error); }
+        }
+        return content;
+    }
 
-    unsafe fn compile(shaderType: u32, shaderSource:&str) -> u32{
+    pub unsafe fn simple()->Self{ return Shader::new("./res/shaders/simple.vs", "./res/shaders/simple.fs", "./res/shaders/simple.gs"); }
+    pub unsafe fn text()->Self{ return Shader::new("./res/shaders/text.vs", "./res/shaders/text.fs", "./res/shaders/simple.gs"); }
+
+    unsafe fn compile(shader_type: u32, shader_source:&str) -> u32{
         // Setup shader compilation checks
         let mut success = i32::from(gl::FALSE);
         let mut info_log = Vec::with_capacity(512);
         info_log.set_len(512 - 1); // -1 to skip trialing null character
 
         // Vertex shader
-        let shader = gl::CreateShader(shaderType);
-        let c_str_vert = CString::new(shaderSource.as_bytes()).unwrap();
+        let shader = gl::CreateShader(shader_type);
+        let c_str_vert = CString::new(shader_source.as_bytes()).unwrap();
         gl::ShaderSource(shader, 1, &c_str_vert.as_ptr(), ptr::null());
         gl::CompileShader(shader);
 
@@ -42,7 +61,7 @@ impl Shader{
         shader
     }
 
-    unsafe fn link(vertex_shader:u32, fragment_shader:u32,) ->u32{
+    unsafe fn link(vertex_shader:u32, fragment_shader:u32) ->u32{
         let mut success = i32::from(gl::FALSE);
         let mut info_log = Vec::with_capacity(512);
         info_log.set_len(512 - 1); // -1 to skip trialing null character
@@ -51,6 +70,7 @@ impl Shader{
         let shader_program = gl::CreateProgram();
         gl::AttachShader(shader_program, vertex_shader);
         gl::AttachShader(shader_program, fragment_shader);
+        //gl::AttachShader(shader_program, geometry_shader);
         gl::LinkProgram(shader_program);
 
         // Check for linking errors
@@ -65,39 +85,46 @@ impl Shader{
         shader_program
     }
 
-    pub unsafe fn setUniformValue(&self, name:&str, value: f32){
+    pub unsafe fn set_uniform_value(&self, name:&str, value: f32){
         let c_name = CString::new(name).unwrap();
         let ptr = c_name.as_ptr();
         let uniform = gl::GetUniformLocation(self.shader_program, ptr);
         gl::ProgramUniform1f(self.shader_program, uniform, value);
     }
 
-    pub unsafe fn setUniformInt(&self, name:&str, value: i32){
+    pub unsafe fn set_uniform_int(&self, name:&str, value: i32){
         let c_name = CString::new(name).unwrap();
         let ptr = c_name.as_ptr();
         let uniform = gl::GetUniformLocation(self.shader_program, ptr);
         gl::ProgramUniform1i(self.shader_program, uniform, value);
     }
 
-    pub unsafe fn setUniformVector3(&self, name:&str, vector:&Vector3){
+    pub unsafe fn set_uniform_vector3(&self, name:&str, vector:&Vector3){
         let c_name = CString::new(name).unwrap();
         let ptr = c_name.as_ptr();
         let uniform = gl::GetUniformLocation(self.shader_program, ptr);
-        gl::ProgramUniform3f(self.shader_program, uniform, vector.getX(), vector.getY(), vector.getZ());
+        gl::ProgramUniform3f(self.shader_program, uniform, vector.get_x(), vector.get_y(), vector.get_z());
     }
 
-    pub unsafe fn setUniformColor(&self, name:&str, color:&Color){
+    pub unsafe fn set_uniform_color(&self, name:&str, color:&Color){
         let c_name = CString::new(name).unwrap();
         let ptr = c_name.as_ptr();
         let uniform = gl::GetUniformLocation(self.shader_program, ptr);
         gl::ProgramUniform4f(self.shader_program, uniform, color.red, color.green, color.blue, color.alpha);
     }
 
-    pub unsafe fn setUniformMatrix(&self, name:&str, matrix: &[[f32; 4]; 4]){
+    pub unsafe fn set_uniform_matrix4(&self, name:&str, matrix: &[[f32; 4]; 4]){
         let c_name = CString::new(name).unwrap();
 
        let uniform = gl::GetUniformLocation(self.shader_program, c_name.as_ptr());
         gl::ProgramUniformMatrix4fv(self.shader_program, uniform, 1, gl::TRUE, std::mem::transmute(matrix));
+    }
+
+    pub unsafe fn set_uniform_matrix3(&self, name:&str, matrix: &[[f32; 3]; 3]){
+        let c_name = CString::new(name).unwrap();
+
+       let uniform = gl::GetUniformLocation(self.shader_program, c_name.as_ptr());
+        gl::ProgramUniformMatrix3fv(self.shader_program, uniform, 1, gl::TRUE, std::mem::transmute(matrix));
     }
 
     pub unsafe  fn bind(&self){

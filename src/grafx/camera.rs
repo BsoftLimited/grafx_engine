@@ -1,60 +1,96 @@
-use crate::grafx::physics::{Vector3, Matrix4};
+use crate::grafx::physics::{Vector2, Vector3, Matrix, Matrix4};
 
-pub enum ViewPortType{ Perspective(f32, f32, f32), Orthographic }
+pub struct CameraData{ view:Box<Matrix4>, projection:Box<Matrix4> }
 
-#[allow(non_snake_case)]
-pub struct ViewPort{ projection:Matrix4, portType:ViewPortType,  viewPointWidth:i32, viewPointHeight:i32}
-#[allow(non_snake_case)]
-#[allow(dead_code)]
-impl ViewPort{
-    pub fn Perspective(fov:f32, width:i32, height:i32)->Self{
-        let view = Matrix4::ProjectionMatrix(fov, width as f32, height as f32, 1.0, 1000.0);
-        ViewPort{ projection:view, portType:ViewPortType::Perspective(fov, 1.0, 1000.0), viewPointWidth:width, viewPointHeight:height}
-    }
-
-    pub fn getViewPortWidth(&self)->i32{ self.viewPointWidth}
-    pub fn getViewPortHeiht(&self)->i32{ self.viewPointHeight}
-    pub fn getType(&self)->&ViewPortType{ &self.portType }
-
-    pub fn setFOV(&mut self, fov:f32){
-        if let ViewPortType::Perspective(field, _, _) = &mut self.portType {
-            *field = fov;
-            self.projection = Matrix4::ProjectionMatrix(fov, self.viewPointWidth as f32, self.viewPointHeight as f32, 1.0, 1000.0);
-        }
-    }
-
-    pub fn setViewPortSize(&mut self, width:i32, hieght:i32){
-        self.viewPointWidth = width;
-        self.viewPointHeight = hieght;
-        if let ViewPortType::Perspective(fov, near, far) = self.portType {
-            self.projection = Matrix4::ProjectionMatrix(fov, self.viewPointWidth as f32, self.viewPointHeight as f32, near, far);
-        }
-    }
-
-    pub fn getProjectionMatrix(&self)->&Matrix4{ &self.projection }
+impl CameraData{
+    pub fn get_view(&self)->&[[f32; 4]; 4]{ self.view.get_data() }
+    pub fn get_projection(&self)->&[[f32; 4]; 4]{ self.projection.get_data() }
 }
 
-#[allow(non_snake_case)]
-pub struct Camera{  view:Matrix4, position:Vector3, target:Vector3, }
-#[allow(non_snake_case)]
+pub struct Frustrum{ width:f32, height:f32, near:f32, far:f32 }
 #[allow(dead_code)]
-impl Camera{
-    pub fn new(x:f32, y:f32, z:f32)->Self{
-        let position = Vector3::new(x, y, z);
-        let target = Vector3::zero();
-        let view = Matrix4::LookAtMatrix(&position, &target, &Vector3::up());
-        Camera{view, position, target}
+impl Frustrum{
+    fn new(width:f32, height:f32, near:f32, far:f32)->Self{
+        Frustrum{ width, height, near, far }
     }
 
-    pub fn setPosition(&mut self, x:f32, y:f32, z:f32){
-        self.position.set(x, y, z);
-        self.view = Matrix4::LookAtMatrix(&self.position, &self.target, &Vector3::up());
+    pub fn set_viewport_size(&mut self, width:f32, height:f32){ 
+        self.width = width;
+        self.height = height
     }
 
-    pub fn translate(&mut self, x:f32, y:f32, z:f32){
-        self.position.addV(x, y, z);
-        self.view = Matrix4::LookAtMatrix(&self.position, &self.target, &Vector3::up());
+    pub fn set_near(&mut self, near:f32){ self.near = near; }
+    pub fn set_far(&mut self, far:f32){ self.far = far; }
+
+    pub fn get_view_port_width(&self)->f32{ self.width }
+    pub fn get_view_port_hieght(&self)->f32{ self.height }
+}
+
+pub trait Camera{
+    fn get_data(&self)->&CameraData;
+    fn get_frustum(&self)->&Frustrum;
+    fn get_frustum_mut(&mut self)->&mut Frustrum;
+    fn update(&mut self);
+}
+
+pub struct OrthographicCamera{ data:Box<CameraData>, position:Box<Vector2>, frustrum:Box<Frustrum>}
+#[allow(dead_code)]
+impl OrthographicCamera{
+    pub fn new(port_width:f32, port_hieght:f32)->Self{
+        let position = Box::new(Vector2::zero());
+        let frustrum = Box::new(Frustrum::new(port_width, port_hieght, 0.0, 0.0));
+        let data = CameraData{
+            view:Box::new(Matrix4::identity()),
+            projection:Box::new(Matrix4::orthogonal_matrix(port_hieght, 0.0, 0.0, port_width, 0.0, 0.0))
+        };
+        OrthographicCamera{ data:Box::new(data), position, frustrum}
     }
 
-    pub fn getViewMatrix(&self)->&Matrix4{ &self.view }
+    pub fn get_position(&self)->&Vector2{ self.position.as_ref() }
+    pub fn set_position(&mut self, x:f32, y:f32){ self.position.set(x, y); }
+    pub fn translate(&mut self, x:f32, y:f32){ self.position.add(x, y); }
+}
+
+impl Camera for OrthographicCamera{    
+    fn get_frustum(&self) -> &Frustrum { self.frustrum.as_ref() }
+    fn get_frustum_mut(&mut self) -> &mut Frustrum { self.frustrum.as_mut() }
+    fn get_data(&self) -> &CameraData { self.data.as_ref() }
+
+    fn update(&mut self) {
+        self.data.projection = Box::new(Matrix4::orthogonal_matrix(
+            self.frustrum.height,
+            self.position.get_y(),
+            self.position.get_x(),
+            self.frustrum.width, 0.0, 0.0));
+    }
+}
+
+pub struct PerspectiveCamera{ fov:f32, data:Box<CameraData>, position:Box<Vector3>, target:Box<Vector3>, frustrum:Box<Frustrum>}
+#[allow(dead_code)]
+impl PerspectiveCamera{
+    pub fn new(fov:f32, port_width:i32, port_hieght:i32)->Self{
+        let position = Box::new(Vector3::zero());
+        let target = Box::new(Vector3::zero());
+        let frustrum = Box::new(Frustrum::new(port_width as f32, port_hieght as f32, 1.0, 1000.0));
+        let view = Matrix4::lookAt_matrix(&position, &target, &Vector3::up());
+        let projection = Matrix4::projection_matrix(fov, port_width as f32, port_hieght as f32, 1.0, 1000.0);
+        let data = CameraData{ view:Box::new(view), projection:Box::new(projection)};
+        PerspectiveCamera{  fov, data:Box::new(data), position, target, frustrum}
+    }
+
+    pub fn get_position(&self)->&Vector3{ self.position.as_ref() }
+    pub fn set_position(&mut self, x:f32, y:f32, z:f32){ self.position.set(x, y, z); }
+    pub fn translate(&mut self, x:f32, y:f32, z:f32){ self.position.add(x, y, z); }
+    pub fn look_at(&mut self, x:f32, y:f32, z:f32){ self.target.set(x, y, z); }
+}
+
+impl Camera for PerspectiveCamera{
+    fn get_frustum(&self) -> &Frustrum { self.frustrum.as_ref() }
+    fn get_frustum_mut(&mut self) -> &mut Frustrum { self.frustrum.as_mut() }
+    fn get_data(&self) -> &CameraData { self.data.as_ref() }
+    fn update(&mut self) {
+        self.data.projection = Box::new(Matrix4::projection_matrix(
+            self.fov, self.frustrum.width, self.frustrum.height, self.frustrum.near, self.frustrum.far));
+        self.data.view = Box::new(Matrix4::lookAt_matrix(self.position.as_ref(), self.target.as_ref(), &Vector3::up()))
+    }
 }

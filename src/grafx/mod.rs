@@ -1,19 +1,24 @@
 extern crate glutin;
 extern crate gl;
 
+pub mod bxml;
 pub mod physics;
 mod resources;
+
 mod camera;
+pub use camera::{Camera, OrthographicCamera, PerspectiveCamera};
+
 pub mod light;
+
 mod renderer;
-pub mod models;
+pub use renderer::{Renderer, SpriteRenderer, ModelRenderer};
+
 pub mod materials;
 
+pub mod objects;
+pub mod utils;
 
 use glutin::{ PossiblyCurrent, WindowedContext};
-pub use camera::{Camera, ViewPort};
-pub use renderer::Renderer;
-pub use light::{Light, LightType };
 pub use materials::BasicMaterial;
 
 
@@ -28,21 +33,16 @@ use glutin::event_loop::{ ControlFlow, EventLoop};
 use glutin::window::{WindowBuilder};
 use glutin::{ContextBuilder};
 
-#[allow(dead_code)]
-#[allow(non_snake_case)]
-pub trait Disposable{ fn dispose(&self); }
+pub trait Disposable{ fn dispose(&mut self); }
 
-#[allow(dead_code)]
-#[allow(non_snake_case)]
 pub struct WindowDetails{ title:String, width:i32, height: i32}
-#[allow(non_snake_case)]
 impl WindowDetails{
     pub fn new(titl:&str, width:i32, height:i32)-> Self{
         WindowDetails{ title:String::from(titl), width, height}
     }
-    pub fn getTitle(&self)->&str{ self.title.as_ref() }
-    pub fn getWidth(&self)->i32{ self.width }
-    pub fn getHeight(&self)->i32{ self.height }
+    pub fn get_title(&self)->&str{ self.title.as_ref() }
+    pub fn get_width(&self)->i32{ self.width }
+    pub fn get_height(&self)->i32{ self.height }
 }
 
 #[allow(dead_code)]
@@ -55,7 +55,7 @@ pub trait WindowHandler : Disposable{
 
 pub fn init(detail:&WindowDetails)->(EventLoop<()>, WindowedContext<PossiblyCurrent>){
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().with_title(detail.getTitle()).with_inner_size(glutin::dpi::LogicalSize::new(detail.getWidth(), detail.getHeight()));
+    let window = WindowBuilder::new().with_title(detail.get_title()).with_inner_size(glutin::dpi::LogicalSize::new(detail.get_width(), detail.get_height()));
     let context = unsafe {
         let context = ContextBuilder::new().build_windowed(window, &event_loop).unwrap();
         context.make_current().unwrap()

@@ -28,7 +28,7 @@ impl Shape{
     }
 
     pub fn Box()->Self{
-        let (vertices, indices) = getBoxVertices(1.0, 1.0, 1.0, Color::White());
+        let (vertices, indices) = getBoxVertices(1.0, 1.0, 1.0, Color::white());
         let (mut vbo, mut ebo, mut vao) = (0, 0, 0);
         unsafe{
             gl::GenVertexArrays(1, &mut vao);
